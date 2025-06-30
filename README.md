@@ -2,6 +2,9 @@
 
 This guide includes **complete YAML examples** for all major GitHub Actions keywords. Copy and paste directly into `.github/workflows/your-workflow.yml`.
 
+
+
+DAY 1
 ---
 
 ## 🟢 1. `name`
