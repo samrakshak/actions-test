@@ -1,7 +1,3 @@
-Here is the full reference in **Markdown format** with headings and code blocks for each GitHub Actions keyword example:
-
----
-
 # 📘 GitHub Actions Keywords – Full Examples
 
 This guide includes **complete YAML examples** for all major GitHub Actions keywords. Copy and paste directly into `.github/workflows/your-workflow.yml`.
