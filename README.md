@@ -415,6 +415,20 @@ permissions:
   statuses: write
 
 ```
+
+```yaml
+| Use Case                     | Needed Permissions       |
+| ---------------------------- | ------------------------ |
+| Read repo contents           | `contents: read`         |
+| Push commits/tags            | `contents: write`        |
+| Create GitHub Releases       | `contents: write`        |
+| Create/close issues          | `issues: write`          |
+| Manage deployments           | `deployments: write`     |
+| Update pull request statuses | `statuses: write`        |
+| Access packages (e.g., GHCR) | `packages: read/write`   |
+| Write security advisories    | `security-events: write` |
+
+```
 ---
 
 Let me know if you want this as a downloadable `.md` file or expanded into a cheat sheet PDF!
