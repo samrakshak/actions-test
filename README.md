@@ -586,7 +586,60 @@ jobs:
 
 ---
 
+Absolutely—let’s **restate the final assignment** in a clean, clear, *implementation-agnostic* way, including your new requirements:
 
+---
+
+## 🎓 **Final Assignment**
+
+You will set up a **monorepo** containing both a frontend and a backend application. Your task is to design and configure **complete CI/CD workflows** with the following requirements:
+
+---
+
+### ✅ **Requirements**
+
+1. **Self-Hosted Runners**
+
+   * Configure **two separate self-hosted runners**:
+
+     * One dedicated to building the backend.
+     * One dedicated to building the frontend.
+   * Ensure each workflow uses the correct runner.
+
+2. **Selective Workflow Triggers**
+
+   * Workflows must **only trigger** when changes occur in their respective directories (`frontend/` or `backend/`).
+   * Changes to non-code files (e.g., `README.md`) must **not trigger any builds**.
+
+3. **Build and Deployment**
+
+   * **Backend:**
+
+     * Build the backend application.
+     * Upload the build artifacts to GitHub so they can be downloaded later.
+   * **Frontend:**
+
+     * Build the frontend application.
+     * Deploy the built frontend site to **GitHub Pages** automatically.
+
+4. **Security Scanning**
+
+   * Integrate a **Trivy security scan** for your application or Docker images.
+   * Generate an **HTML report** of the scan results.
+   * Publish the report in **GitHub Pages** under a separate path such as `/scan`.
+
+
+Document should be well written.
+
+5. **Bonus (Optional)**
+
+   * In addition to the regular build artifacts:
+
+     * Produce **Docker image exports** of both the frontend and backend applications.
+     * Publish the exported Docker images as downloadable artifacts.
+   * Update the deployed frontend site to include a **download button or link** that allows users to download these artifacts easily.
+
+---
 
 ---
 
