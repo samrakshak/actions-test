@@ -589,6 +589,14 @@ jobs:
 Absolutely—let’s **restate the final assignment** in a clean, clear, *implementation-agnostic* way, including your new requirements:
 
 ---
+##DAY 2
+
+
+
+
+
+
+
 
 ## 🎓 **Final Assignment**
 
