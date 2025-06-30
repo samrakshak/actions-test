@@ -396,6 +396,25 @@ jobs:
       - run: echo "This job has limited permissions."
 ```
 
+
+All Permission Declared
+
+```yaml
+permissions:
+  actions: write
+  checks: write
+  contents: write
+  deployments: write
+  issues: write
+  discussions: write
+  packages: write
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
+
+```
 ---
 
 Let me know if you want this as a downloadable `.md` file or expanded into a cheat sheet PDF!
