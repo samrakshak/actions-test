@@ -586,15 +586,7 @@ jobs:
 
 ---
 
-✅ **Tip:**
-If you want to publish to **GitHub Container Registry (`ghcr.io`)** instead, the workflow is almost identical, but you:
 
-* Use `docker/login-action` with `registry: ghcr.io`
-* Tag your image as `ghcr.io/OWNER/IMAGE_NAME:tag`
-
-If you’d like, I can show you an example for `ghcr.io` too!
-
-Just let me know ✨
 
 ---
 
