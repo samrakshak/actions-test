@@ -12,7 +12,7 @@ DAY 1
 ```yaml
 name: CI Pipeline
 
-on: [push]
+on: [push]  or pull_request 
 
 jobs:
   say-hello:
