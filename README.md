@@ -589,8 +589,479 @@ jobs:
 Absolutely—let’s **restate the final assignment** in a clean, clear, *implementation-agnostic* way, including your new requirements:
 
 ---
-##DAY 2
+## DAY 2
 
+Absolutely—let’s **upgrade this into a professional DevOps training pack**.
+
+Below is **clear, structured content** with **full examples**, **best practices**, and **practical context** for your interns.
+
+---
+
+# 🎓 GitHub Actions Advanced DevOps Training
+
+✅ **Target Audience:** Junior engineers and interns
+✅ **Focus:** Real-world workflows and reusable examples
+✅ **Skill Level:** Intermediate to Advanced
+
+---
+
+## 🟢 1️⃣ Environment Variables, Secrets & Environments
+
+---
+
+### ✅ 1.1 Default GitHub Environment Variables
+
+GitHub provides built-in variables automatically:
+
+| Variable            | Description            |
+| ------------------- | ---------------------- |
+| `GITHUB_REPOSITORY` | Owner/repo name        |
+| `GITHUB_REF`        | Branch or tag ref      |
+| `GITHUB_SHA`        | Commit SHA             |
+| `GITHUB_RUN_NUMBER` | Workflow run number    |
+| `GITHUB_WORKSPACE`  | Working directory path |
+
+**Example:**
+
+```yaml
+jobs:
+  show-defaults:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Branch/Tag: $GITHUB_REF"
+          echo "Commit SHA: $GITHUB_SHA"
+```
+
+---
+
+### ✅ 1.2 Custom Environment Variables
+
+You can define custom variables globally, per job, or per step.
+
+**Workflow-level (global):**
+
+```yaml
+env:
+  APP_ENV: production
+  GLOBAL_VAR: "Available everywhere"
+
+jobs:
+  print-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Workflow-level APP_ENV = $APP_ENV"
+```
+
+---
+
+**Job-level:**
+
+```yaml
+jobs:
+  job-vars:
+    runs-on: ubuntu-latest
+    env:
+      JOB_VAR: "Only in this job"
+    steps:
+      - run: echo "JOB_VAR = $JOB_VAR"
+```
+
+---
+
+**Step-level:**
+
+```yaml
+jobs:
+  step-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print step variable
+        run: echo "STEP_VAR = $STEP_VAR"
+        env:
+          STEP_VAR: "Visible in this step only"
+```
+
+---
+
+### ✅ 1.3 GitHub Secrets
+
+Secrets are **encrypted variables** stored securely.
+
+**How to add:**
+
+1. Go to **Settings > Secrets and Variables > Actions**.
+2. Click **New repository secret**.
+
+Example: `DOCKER_PASSWORD`
+
+**Usage:**
+
+```yaml
+jobs:
+  show-secret:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "My secret is ${{ secrets.DOCKER_PASSWORD }}"
+```
+
+---
+
+### ✅ 1.4 GitHub Environments
+
+**Environments** provide:
+
+* Scoped secrets per environment.
+* Protection rules (approvals).
+* Deployment history.
+
+**Example:**
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "Deploying to production"
+      - run: echo "Secret = ${{ secrets.PRODUCTION_API_KEY }}"
+```
+
+✅ **Tip:** Use environments for staging/production separation.
+
+---
+
+## 🟢 2️⃣ Caching Dependencies (Node.js frontend & backend)
+
+---
+
+### ✅ 2.1 Why Caching Matters
+
+* Speeds up builds by reusing `node_modules`.
+* Avoids downloading dependencies every time.
+
+---
+
+### ✅ 2.2 Node.js Monorepo Example
+
+Imagine this structure:
+
+```
+/
+  frontend/
+    package.json
+    package-lock.json
+  backend/
+    package.json
+    package-lock.json
+```
+
+---
+
+**Example: Caching frontend dependencies**
+
+```yaml
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: frontend-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: frontend-${{ runner.os }}-
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+      - run: npm run build
+```
+
+---
+
+**Example: Caching backend dependencies**
+
+```yaml
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: backend-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: backend-${{ runner.os }}-
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+      - run: npm run build
+```
+
+✅ **Note:** This pattern ensures **separate caches for frontend and backend**.
+
+---
+
+## 🟢 3️⃣ Using Marketplace Actions
+
+---
+
+**Marketplace actions save time.**
+
+---
+
+**Example: Setup Node, cache, and upload build artifacts**
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+```
+
+✅ **Tip:** Always check the Marketplace rating before using third-party actions.
+
+---
+
+## 🟢 4️⃣ Creating Your Own Reusable Actions
+
+---
+
+### ✅ 4.1 Composite Action Example
+
+**Directory: `.github/actions/hello-world/action.yml`**
+
+```yaml
+name: Hello World
+description: Greets the user
+
+inputs:
+  who:
+    description: Who to greet
+    required: true
+    default: World
+
+runs:
+  using: "composite"
+  steps:
+    - run: echo "Hello, ${{ inputs.who }}!"
+```
+
+---
+
+**Usage:**
+
+```yaml
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/hello-world
+        with:
+          who: "Interns"
+```
+
+✅ **Tip:** Use composite actions to DRY up repetitive steps across workflows.
+
+---
+
+## 🟢 5️⃣ Semantic Versioning
+
+---
+
+### ✅ 5.1 Principles
+
+* **MAJOR** – incompatible API changes
+* **MINOR** – backward-compatible features
+* **PATCH** – bug fixes
+
+---
+
+**Example: Automate version bump and tagging with `semantic-release`**
+
+---
+
+**Workflow:**
+
+```yaml
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm install -g semantic-release @semantic-release/git @semantic-release/github
+
+      - run: semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+---
+
+**`package.json` (scripts):**
+
+```json
+{
+  "release": "semantic-release"
+}
+```
+
+---
+
+✅ **Tip:** Configure `.releaserc` for your changelog format.
+
+---
+
+## 🟢 6️⃣ Creating GitHub Releases and Tags
+
+---
+
+### ✅ 6.1 Create Release on Tag Push
+
+```yaml
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            🎉 Automated release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+---
+
+**✅ Example Tag:**
+
+```
+v1.2.3
+```
+
+Creates a GitHub release with that tag.
+
+---
+
+## 🟢 7️⃣ Generating Release Notes Automatically
+
+---
+
+**Example using `release-drafter`:**
+
+**`.github/release-drafter.yml`:**
+
+```yaml
+name-template: 'v$NEXT_PATCH_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
+categories:
+  - title: 🚀 Features
+    labels: feature
+  - title: 🐛 Fixes
+    labels: fix
+```
+
+**Workflow:**
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+✅ **Tip:** Release Drafter automatically updates your draft release notes as you merge PRs.
+
+---
+
+# 🎯 Recap of What You Covered
+
+✅ Environment Variables (default, custom, secrets, environments)
+✅ Caching Node.js builds (frontend + backend)
+✅ Using Marketplace Actions
+✅ Creating Your Own Actions
+✅ Semantic Versioning Automation
+✅ Creating GitHub Releases and Tags
+✅ Generating Release Notes
+
+---
+
+If you want, I can:
+
+* Help you design **slide decks**
+* Prepare **assignments and solutions**
+* Create **grading rubrics**
+* Write additional examples (e.g., Python, Java, Docker)
+
+Just say the word! 🌟
 
 
 
