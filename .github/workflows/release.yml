@@ -1,24 +1,90 @@
-# .github/workflows/release.yml
-name: Create Release from Tag
+# .github/workflows/release-on-semver-tag.yml
+name: Build and Release on Semantic Version Tag
 
 on:
   push:
     tags:
-      - 'v1.0.0'
+      - '*'
 
 jobs:
-  release:
+  validate-tag:
     runs-on: ubuntu-latest
+    outputs:
+      is_semver: ${{ steps.check-tag.outputs.is_semver }}
     steps:
-      - name: Checkout Code
+      - name: Extract tag
+        id: extract-tag
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Check semantic version
+        id: check-tag
+        run: |
+          TAG_NAME="${{ steps.extract-tag.outputs.tag }}"
+          echo "Checking if '$TAG_NAME' is a valid semantic version..."
+          if [[ "$TAG_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "✅ Semantic version detected."
+            echo "is_semver=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Tag is not a valid semantic version (vX.Y.Z)."
+            echo "is_semver=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-release:
+    runs-on: ubuntu-latest
+    needs: validate-tag
+    if: needs.validate-tag.outputs.is_semver == 'true'
+    steps:
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Publish package to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            🎉 New release ${{ github.ref_name }}
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  fail-non-semver:
+    runs-on: ubuntu-latest
+    needs: validate-tag
+    if: needs.validate-tag.outputs.is_semver == 'false'
+    steps:
+      - name: Fail build due to invalid tag
+        run: |
+          echo "❌ This workflow requires semantic version tags in the form vX.Y.Z."
+          exit 1
