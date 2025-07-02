@@ -762,27 +762,41 @@ Imagine this structure:
 **Example: Caching frontend dependencies**
 
 ```yaml
+# .github/workflows/cache-node-modules.yml
+name: Cache Node Modules
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
-  build-frontend:
+  build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - uses: actions/cache@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          path: frontend/node_modules
-          key: frontend-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: frontend-${{ runner.os }}-
+          node-version: '20'
 
-      - uses: actions/setup-node@v4
+      - name: Cache node_modules
+        uses: actions/cache@v4
         with:
-          node-version: 18
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      - run: npm ci
-      - run: npm run build
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
 ```
 
 ---
